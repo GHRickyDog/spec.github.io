@@ -446,21 +446,21 @@
                     <p class="text-xs text-gray-400">Inserisci i dati reali. I tempi inventati durano poco ⏳</p>
                 </div>
 
-                <form id="telemetry-form" onsubmit="submitTelemetry(event)" class="space-y-3">
-                    <input type="text" id="form-driver" required placeholder="Pilota / Tag" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                <form id="telemetry-form" action="https://formspree.io/f/myeyzdgd" method="POST" onsubmit="submitTelemetry(event)" class="space-y-3">
+                    <input type="text" id="form-driver" name="pilota" required placeholder="Pilota / Tag" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" id="form-sim" required placeholder="Sim (es. LMU, ACC)" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
-                        <input type="text" id="form-car" required placeholder="Auto (es. Ferrari 499P)" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                        <input type="text" id="form-sim" name="simulatore" required placeholder="Sim (es. LMU, ACC)" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                        <input type="text" id="form-car" name="auto" required placeholder="Auto (es. Ferrari 499P)" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" id="form-track" required placeholder="Pista" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
-                        <input type="text" id="form-date" required placeholder="Data" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                        <input type="text" id="form-track" name="tracciato" required placeholder="Pista" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                        <input type="text" id="form-date" name="data" required placeholder="Data" class="bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
                     </div>
-                    <input type="text" id="form-time" required placeholder="Tempo Giro (es. 1:33.881)" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
-                    <input type="text" id="form-notes" placeholder="Note (opzionali)" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                    <input type="text" id="form-time" name="tempo" required placeholder="Tempo Giro (es. 1:33.881)" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
+                    <input type="text" id="form-notes" name="note" placeholder="Note (opzionali)" class="w-full bg-black border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neon-purple">
 
-                    <button type="submit" class="w-full py-2.5 bg-neon-purple hover:bg-neon-purple-bright text-white font-bold text-xs uppercase rounded-lg border border-neon-purple-bright">
-                        INVIA GIRO
+                    <button type="submit" class="w-full py-2.5 bg-neon-purple hover:bg-neon-purple-bright text-white font-bold text-xs uppercase rounded-lg border border-neon-purple-bright cursor-pointer">
+                        INVIA GIRO 🏁
                     </button>
                 </form>
             </div>
@@ -485,7 +485,6 @@
 
             <div id="faq-container" class="max-w-2xl mx-auto space-y-3">
                 <h3 class="font-bold text-lg text-white mb-4 text-center">FAQ da parte di nessuno 🤨</h3>
-                <!-- Popolato da CONFIG.faqs -->
             </div>
         </div>
     </main>
@@ -807,22 +806,29 @@
             renderBoard(sorted);
         }
 
-        function submitTelemetry(e) {
+        async function submitTelemetry(e) {
             e.preventDefault();
-            const newEntry = {
-                driver: document.getElementById('form-driver').value,
-                sim: document.getElementById('form-sim').value,
-                car: document.getElementById('form-car').value,
-                track: document.getElementById('form-track').value,
-                date: document.getElementById('form-date').value,
-                time: document.getElementById('form-time').value,
-                notes: document.getElementById('form-notes').value || '-'
-            };
+            const form = e.target;
+            const formData = new FormData(form);
 
-            CONFIG.times.unshift(newEntry);
-            renderBoard(CONFIG.times);
-            document.getElementById('telemetry-form').reset();
-            alert('Giro registrato nella Spec Board.');
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    alert('Telemetry inviata alla Spec Board con successo! 🏁🔥');
+                } else {
+                    alert('Errore nell\'invio della telemetria. Riprova, pilota!');
+                }
+            } catch (error) {
+                alert('Connessione persa nei box. Controlla i cavi! 💀');
+            }
         }
 
         function toggleSpecChat() {
